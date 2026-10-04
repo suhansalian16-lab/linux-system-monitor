@@ -52,6 +52,11 @@ while True:
 		except (psutil.NoSuchProcess,psutil.AcessDenied):
 			pass
 	processes.sort(key=lambda x:x['cpu_percent'], reverse=True)
+	print("\nTOP CPU PROCESSES")
 	for process in processes[:5]:
 		print(process['name'],"CPU:",round(process['cpu_percent'],1),"%", "RAM:",round(process['memory_percent'],1),"%")
+	processes.sort(key=lambda x:x['memory_percent'],reverse=True)
+	print("\n TOP RAM PROCESSES")
+	for process in processes[:5]:
+		print(process['name'],"RAM:",round(process['memory_percent'],1),"%","CPU:",round(process['cpu_percent'],1),"%")
 	time.sleep(2) 
