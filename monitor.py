@@ -4,6 +4,23 @@ import os
 CPU_LIMIT=80
 RAM_LIMIT=80
 DISK_LIMIT=80
+def get_cpu_usage():
+	return psutil.cpu_percent(interval=1)
+def get_ram_usage():
+	memory=psutil.virtual_memory()
+	return memory
+def get_disk_usage():
+	return psutil.disk_usage("/")
+def get_network_usage():
+	return psutil.net_io_counters()
+def get_process():
+	processes=[]
+	for process in psutil.process_iter(['name', 'cpu_percent', 'memory_percent']):
+		try:
+			processes.append(process.info)
+		except (psutil.NoSuchProcess,psutil.AcessDenied):
+			pass
+	return processes
 LOG_FILE="system.log"
 old_sent=psutil.net_io_counters().bytes_sent
 old_recieved=psutil.net_io_counters().bytes_recv
@@ -13,13 +30,13 @@ while True:
 	print("======================================")
 	print("     SYSTEM MONITOR       ")
 	print("======================================")
-	cpu=psutil.cpu_percent()
-	memory=psutil.virtual_memory()
+	cpu=get_cpu_usage()
+	memory=get_ram_usage()
 	print("CPU Usage :", cpu, "%")
 	ram_used=memory.used/(1024**3)
 	ram_total=memory.total/(1024**3)
 	print("RAM Usage :", round(ram_used,2),"/",round(ram_total,2), "GB")
-	disk=psutil.disk_usage("/")
+	disk=get_disk_usage()
 	disk_used=disk.used/(1024**3)
 	disk_total=disk.total/(1024**3)
 	print("Disk Usage:", round(disk_used,2), "/", round(disk_total,2), "GB")
@@ -27,7 +44,7 @@ while True:
 	hours=int(uptime_seconds//3600)
 	minutes=int((uptime_seconds%3600)//60)
 	print("Uptime :",hours, "hours",minutes, "minutes")
-	network = psutil.net_io_counters()
+	network = get_network_usage()
 	sent=network.bytes_sent/(1024**2)
 	recieved=network.bytes_recv/(1024**2)
 	current_time=time.time()
@@ -51,12 +68,7 @@ while True:
 	old_received=network.bytes_recv
 	old_time=current_time
 	print("\nTOP PROCESSES")
-	processes=[]
-	for process in psutil.process_iter(['name', 'cpu_percent', 'memory_percent']):
-		try:
-			processes.append(process.info)
-		except (psutil.NoSuchProcess,psutil.AcessDenied):
-			pass
+	processes=get_process()
 	processes.sort(key=lambda x:x['cpu_percent'], reverse=True)
 	print("\nTOP CPU PROCESSES")
 	for process in processes[:5]:
