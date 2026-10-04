@@ -44,4 +44,14 @@ while True:
 	old_sent=network.bytes_sent
 	old_received=network.bytes_recv
 	old_time=current_time
+	print("\nTOP PROCESSES")
+	processes=[]
+	for process in psutil.process_iter(['name', 'cpu_percent', 'memory_percent']):
+		try:
+			processes.append(process.info)
+		except (psutil.NoSuchProcess,psutil.AcessDenied):
+			pass
+	processes.sort(key=lambda x:x['cpu_percent'], reverse=True)
+	for process in processes[:5]:
+		print(process['name'],"CPU:",round(process['cpu_percent'],1),"%", "RAM:",round(process['memory_percent'],1),"%")
 	time.sleep(2) 
