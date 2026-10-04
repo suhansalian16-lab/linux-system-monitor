@@ -1,6 +1,10 @@
 import psutil
 import time
 import os
+CPU_LIMIT=80
+RAM_LIMIT=80
+DISK_LIMIT=80
+LOG_FILE="system.log"
 old_sent=psutil.net_io_counters().bytes_sent
 old_recieved=psutil.net_io_counters().bytes_recv
 old_time=time.time()
@@ -35,11 +39,13 @@ while True:
 	print("Data Recev :",round(recieved,2), "MB")
 	print("Upload Speed :",round(upload_speed,2), "MB/s")
 	print("Download Speed :",round(download_speed,2), "MB/s")
-	if cpu>80:
+	with open(LOG_FILE, "a")as log:
+		log.write(f"CPU: {cpu}% | " f"RAM: {memory.percent}% |" f"DISK: {disk.percent}% |" f"Upload: {upload_speed:.2f} MB/s |" f"Download: {download_speed:.2f} MB/s\n")
+	if cpu>CPU_LIMIT:
 		print("WARNING: High CPU Usage!")
-	if memory.percent>80:
+	if memory.percent>RAM_LIMIT:
 		print("WARNING: High RAM Usage!")
-	if disk.percent>80:
+	if disk.percent>DISK_LIMIT:
 		print("WARNING: Disk Space is getting LOW!")
 	old_sent=network.bytes_sent
 	old_received=network.bytes_recv
